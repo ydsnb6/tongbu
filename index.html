@@ -1,1 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>双机剪贴板</title>
+<style>
+body { font-family: sans-serif; padding: 20px; background: #f0f0f0; }
+textarea { width: 100%; height: 200px; font-size: 16px; padding: 10px; box-sizing: border-box; border: 2px solid #333; border-radius: 8px; }
+button { width: 100%; padding: 15px; font-size: 18px; font-weight: bold; background: #007bff; color: white; border: none; border-radius: 8px; margin-top: 10px; }
+</style>
+</head>
+<body>
+<h3>📋 跨设备剪贴板</h3>
+<p>在框里粘贴文字，点保存。另一个手机打开这个网页刷新就能看到。</p>
+<textarea id="myText" placeholder="在这里粘贴你要同步的内容..."></textarea>
+<button onclick="saveText()">保存并同步</button>
+<p id="status" style="color:green; text-align:center;"></p>
 
+<script>
+const binId = "65d7e2f1a8b45c0019c3a4b2";
+const apiUrl = "https://jsonblob.com/api/jsonBlob/" + binId;
+
+fetch(apiUrl)
+  .then(res => res.ok ? res.json() : { content: "" })
+  .then(data => { document.getElementById("myText").value = data.content || ""; })
+  .catch(() => {});
+
+function saveText() {
+  const text = document.getElementById("myText").value;
+  const status = document.getElementById("status");
+  status.innerText = "正在保存...";
+  
+  fetch(apiUrl, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ content: text })
+  })
+  .then(res => {
+    if(res.ok) { status.innerText = "✅ 已同步！另一个手机刷新即可看到。"; }
+    else { status.innerText = "❌ 网络错误，稍后再试"; }
+  });
+}
+</script>
+</body>
+</html>
